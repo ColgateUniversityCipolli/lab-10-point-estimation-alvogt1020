@@ -238,6 +238,7 @@ After creating this function, we obtain our Method of Moments estimates using `n
 ## Part c
 Write a function that computes the log-likelihood for Altham's Multiplicative Binomial Distribution, given data (`x`) and proposed parameter values $p$ (`prob`) and $\theta$ (`theta`).
 
+**Solution:**  
 ```{r}
 llaltbinom = function(x, n, p, theta){
   sum(log(daltbinom(x = x, size = n, prob = p, theta = theta)))
@@ -246,6 +247,10 @@ llaltbinom = function(x, n, p, theta){
 
 ## Part d
 Describe how you can use your answer to part c to find Maximum Likelihood estimates for the parameters $p$ and $\theta$ for Altham's Multiplicative Binomial Distribution based on data.
+
+**Solution:**   
+To begin, we create a function that takes in a vector of parameters as an input ($p$ = `params[1]`, $\theta$ = `params[2]`), 
+
 
 # Lab 10
 Peter "Snakebite" Wright is a two-time Professional Darts Corporation World Champion (2020, 2022) and a former World No. 1. He is one of the sport's most decorated players, winning nearly 50 PDC titles including the World Matchplay, UK Open, and multiple European Championships. 
