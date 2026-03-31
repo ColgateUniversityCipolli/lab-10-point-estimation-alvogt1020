@@ -140,7 +140,7 @@ Suppose a player has a 50\% chance of winning a specific leg, that is let $p=0.5
 ```{r}
 #computing probabilities
 p = 0.5
-thetas = seq(from=0.5,to=1.5,by=0.02)
+thetas = seq(from=0.5,to=1.5,by=0.01)
 probabilities = daltbinom(x=6,size=11,prob=p,theta=thetas)
 
 #creating data for plots
@@ -153,9 +153,7 @@ ggdat = tibble(
   ggdat |> 
     ggplot(aes(x = theta, 
                y = probs)) +
-    geom_line() +
-    geom_point(size = 0.7, 
-               color = "darkorchid2") +
+    geom_line(color = "steelblue") +
     geom_hline(yintercept = 0) +
     ylab("P(X=6)") +
     xlab("Theta") +
@@ -165,6 +163,10 @@ ggdat = tibble(
 
 ## Part b
 Now, plot Altham's Multiplicative Binomial Distribution under the same parameters with $\theta=0.50$, $\theta=1$, and $\theta=1.5$. Use `ncol=1` in `facet_wrap()` to plot the PMFs in a single column for comparing.
+
+**Solution:**
+```{r}
+```
 
 ## Part c
 What is your best assessment of what $\theta$ is doing in this setting. Consider when a 6-0 blowout is most likely, and when a 5-6 nail-biter is most likely. Note here we should treat the match as a fixed $n=11$ as we did for $n=3$ in Lab 8.\
