@@ -166,6 +166,35 @@ Now, plot Altham's Multiplicative Binomial Distribution under the same parameter
 
 **Solution:**
 ```{r}
+#computing PMFs
+p = 0.5
+x.vals = seq(from=0,to=11,by=1)
+
+#theta=0.5
+probabilities.05 = daltbinom(x=x.vals,size=11,prob=p,theta=0.5)
+
+#theta=1
+probabilities.1 = daltbinom(x=x.vals,size=11,prob=p,theta=1)
+
+#theta=1.5
+probabilities.15 = daltbinom(x=x.vals,size=11,prob=p,theta=1.5)
+
+ggdat = tibble(
+  theta = rep(c("Theta = 0.5","Theta = 1","Theta = 1.5"),each=12),
+  x = rep(x.vals,3),
+  prob = c(probabilities.05,probabilities.1,probabilities.15)
+)
+
+ggdat |>
+  ggplot(aes(x = x,
+             y = prob)) +
+  facet_wrap(~ theta,ncol=1) +
+  geom_bar(stat="identity") +
+  geom_hline(yintercept = 0) +
+  xlab("P(X=x)") +
+  ylab("Probability") +
+  ggtitle("Altham's Multiplicative Binomial PMF for Theta = 0.5, 1, 1.5") +
+  theme_bw()
 ```
 
 ## Part c
