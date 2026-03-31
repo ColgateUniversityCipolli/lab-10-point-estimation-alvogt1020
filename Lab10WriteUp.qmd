@@ -229,8 +229,20 @@ altbinom.moments <- function(n,k,prob,theta){
 ## Part b
 Describe how you can use your answer to part a to find Method of Moments estimates for the parameters $p$ and $\theta$ for Altham's Multiplicative Binomial Distribution based on data.
 
+**Solution:**   
+To find parameters using our data and our Method of Moments function, we can build a function that takes in a vector of parameters and the data. The first thing this function will do is extract the parameters ($p$ = `param[1]` and $\theta$ = `param[2]`) using vector indexing. Then, it will calculate the first two sample moments `m1` $= \overline{x}$ and `m2` $= \overline{x^2}$. Note that only the first two moments are needed for Altham's Multiplicative Binomial Distribution because there are only two unknown parameters. After this, we write expressions for the theoretical population moments `E1` $= E(X)$ and `E2` $= $E(X^2)$ as functions of the parameters. Then, we end the function by returning a vector for which the entries are `E1-m1` and `E2-m2`. 
+
+After creating this function, we obtain our Method of Moments estimates using `nleqslv::nleqslv` with an initial guess for our parameters, the function we just defined, and the data. The solver will then do all the computational work for us and produce parameters that make both `E1-m1` and `E2-m2` very close to 0.
+
+
 ## Part c
 Write a function that computes the log-likelihood for Altham's Multiplicative Binomial Distribution, given data (`x`) and proposed parameter values $p$ (`prob`) and $\theta$ (`theta`).
+
+```{r}
+llaltbinom = function(x, n, p, theta){
+  sum(log(daltbinom(x = x, size = n, prob = p, theta = theta)))
+}
+```
 
 ## Part d
 Describe how you can use your answer to part c to find Maximum Likelihood estimates for the parameters $p$ and $\theta$ for Altham's Multiplicative Binomial Distribution based on data.
