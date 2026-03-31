@@ -189,7 +189,9 @@ ggdat |>
   ggplot(aes(x = x,
              y = prob)) +
   facet_wrap(~ theta,ncol=1) +
-  geom_bar(stat="identity") +
+    geom_linerange(aes(x = x, 
+                       ymin = 0, 
+                       ymax = prob)) +
   geom_hline(yintercept = 0) +
   xlab("P(X=x)") +
   ylab("Probability") +
@@ -200,6 +202,9 @@ ggdat |>
 ## Part c
 What is your best assessment of what $\theta$ is doing in this setting. Consider when a 6-0 blowout is most likely, and when a 5-6 nail-biter is most likely. Note here we should treat the match as a fixed $n=11$ as we did for $n=3$ in Lab 8.\
 **Note:** In lab 8, we saw that small $\theta$ meant wins came in bunches (clumped together), so there were more 2-0 wins in a best of three series.
+
+**Solution:**
+It appears as though the parameter $\theta$ directly affects the shape of the PMF. Low values of $\theta$ cluster outcomes/successes toward extreme scenarios ("sweeps"). Larger values for $\theta$ appear to do the opposite, clustering outcomes toward the center and reducing the likelihood of these sweeps occurring. Therefore, 6-0 blowouts are more likely for lower $\theta$, while 5-6 nail-biters are more likely for larger $\theta$. Based on this, I assume that $\theta$ must model momentum, with smaller $\theta$ increasing the effect of momentum on each subsequent round and vice versa.
 
 # Question 2
 
