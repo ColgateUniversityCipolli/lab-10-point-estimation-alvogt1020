@@ -211,6 +211,21 @@ It appears as though the parameter $\theta$ directly affects the shape of the PM
 ## Part a
 Altham's Multiplicative Binomial Distribution does not typically simplify to the clean $E(X)=np$ seen in the Binomial distribution, unless $\theta = 1$. Write out the expression that would need to be solved to find $E(X^k)$, and then write a function that computes it given the proposed parameter values $p$ (`prob`) and $\theta$ (`theta`).
 
+**Solution:**
+The expression that would need to be solved to find $E(X^k)$ is the following:
+$$ E(X^k) = \sum_{x=-\infty}^{\infty} x^kf_{X}(x) $$
+
+Note that it doesn't matter if the sum's lower limit is $-\infty$, $0$, or any value in between. This is because the PMF $f_{X}(x)$ includes an indicator function, $I(x \in \{0, 1, ..., n\})$, that forces the PMF to equal $0$ for any $x$ outside of the specified support. To compute this computationally, we will compute the sum exclusively over the support.
+
+*Function:*
+```{r}
+altbinom.moments <- function(n,k,prob,theta){
+  x.vals = 0:n
+  pmf.vals = daltbinom(x=x.vals,size=n,prob=prob,theta=theta)
+  sum(x.vals^k * pmf.vals)
+}
+```
+
 ## Part b
 Describe how you can use your answer to part a to find Method of Moments estimates for the parameters $p$ and $\theta$ for Altham's Multiplicative Binomial Distribution based on data.
 
