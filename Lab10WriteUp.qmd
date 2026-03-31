@@ -136,6 +136,33 @@ To help us think about the interpretation, something that was challenging before
 ## Part a
 Suppose a player has a 50\% chance of winning a specific leg, that is let $p=0.50$. Let's look at the probability they win ($x=6$) legs in the match. Compute this probability over a sequence from $\theta=0.5$ to $\theta=1.5$ and plot it using a line where the $x$-axis is $\theta$ and the $y$-axis is $P(X=6)$.
 
+**Solution:**
+```{r}
+#computing probabilities
+p = 0.5
+thetas = seq(from=0.5,to=1.5,by=0.02)
+probabilities = daltbinom(x=6,size=11,prob=p,theta=thetas)
+
+#creating data for plots
+ggdat = tibble(
+    theta = thetas,
+    probs = probabilities
+)
+
+#plot
+  ggdat |> 
+    ggplot(aes(x = theta, 
+               y = probs)) +
+    geom_line() +
+    geom_point(size = 0.7, 
+               color = "darkorchid2") +
+    geom_hline(yintercept = 0) +
+    ylab("P(X=6)") +
+    xlab("Theta") +
+    ggtitle("P(X=6) for Theta from 0.5 to 1.5") +
+    theme_bw()
+```
+
 ## Part b
 Now, plot Altham's Multiplicative Binomial Distribution under the same parameters with $\theta=0.50$, $\theta=1$, and $\theta=1.5$. Use `ncol=1` in `facet_wrap()` to plot the PMFs in a single column for comparing.
 
