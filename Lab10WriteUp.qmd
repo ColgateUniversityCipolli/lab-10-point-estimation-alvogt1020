@@ -290,6 +290,7 @@ In `pdc2024.csv`, I have provided the data for the 2024 Premier League season. T
 
 **Solution:**
 ```{r}
+#Cleaning
 pdc.dat = read_csv("pdc2024.csv")
 pdc.dat = pdc.dat |> 
   filter(Night %in% 1:16 & Score != "w/o") |>
@@ -298,8 +299,39 @@ pdc.dat = pdc.dat |>
     WinnerLegs = as.numeric(WinnerLegs),
     LoserLegs  = as.numeric(LoserLegs)
   )
+
+#Summary
+pdc.dat = pdc.dat |>
+  mutate(
+    LegDifference = WinnerLegs - LoserLegs
+  )
+
+(pdc.sum = pdc.dat |>
+  summarize(
+    mean = mean(LegDifference),
+    sd = sd(LegDifference),
+    median = median(LegDifference),
+    IQR = IQR(LegDifference),
+    min = min(LegDifference),
+    max = max(LegDifference),
+    skew = e1071::skewness(LegDifference),
+    ekurt = e1071::kurtosis(LegDifference)
+  ))
+
+#Visualization
+ggplot(pdc.dat) +
+  geom_bar(aes(x = factor(LegDifference),
+               y = after_stat(count/sum(count)))) +
+  theme_bw() +
+  labs(
+    x = "Leg Difference",
+    y = "Proportion of Matches"
+  )
+
 ```
 
+*Interpretation of Results:*
+The numerical summary tells us that the median leg difference in each match is 2 and that the middle 50% of matches (IQR) are between 1-leg wins and 3-leg wins. We analyze median and IQR in place of mean and standard deviation due to the data's right skewness (skewness = 0.374). The shape of the barplot shows us how most matches are close competitions, with zero blow-outs and very few "beat-downs", so to speak.
 
 ## Altham's Multiplicative Binomial Distribution
 For each player in the 2024 season, use the number of legs won in each match to compute maximium likelihood estimates for $p$ and $\theta$. \
