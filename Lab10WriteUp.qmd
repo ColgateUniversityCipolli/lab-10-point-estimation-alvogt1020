@@ -243,7 +243,9 @@ We also include an `ifelse()` statement that returns the negative log-likelihood
 **Solution:**  
 ```{r}
 llaltbinom = function(par, x, n, mle=F){
-  ll = sum(log(daltbinom(x = x, size = n, prob = par[1], theta = par[2])))
+  p = ifelse(mle, 1/(1+exp(-par[1])), par[1]) 
+  theta =  ifelse(mle, exp(par[2]), par[2])
+  ll = sum(log(daltbinom(x = x, size = n, prob = p, theta = theta)))
   ifelse(mle, -ll,ll)
 }
 ```
@@ -342,6 +344,50 @@ For each player in the 2024 season, use the number of legs won in each match to 
 **Note:** In Lecture on Monday, we used transformations to restrict how `optim()` searches the parameter space. For example, here, you might consider
 `p <- 1/(1+exp(-par[1]))` and `theta <- exp(par[2])`.
 * Make comments about the MLEs in the context of the standings.
+
+**Solution:**
+```{r}
+#obtain unique list of player names to loop over
+players = unique(c(pdc.dat$Winner,pdc.dat$Loser))
+
+#preallocated tibble to store MLE estimates
+  results = tibble(
+    Player = players,
+    p = NA,
+    theta = NA
+  )
+
+for(i in 1:length(players)){
+  won = pdc.dat |>
+    filter(Winner==players[i])
+    #head(won)
+  lost = pdc.dat |>
+    filter(Loser==players[i])
+    #head(lost) 
+  leg.counts = c(won$WinnerLegs, lost$LoserLegs)
+
+  #building MLE
+  params = c(0,0) #moderate initial guesses
+  mle = optim(par=params,
+                 fn=llaltbinom,
+                 x=leg.counts,
+                 n=6,
+                 mle=T)
+  
+  p.mle = 1/(1+exp(-mle$par[1]))
+  theta.mle <- exp(mle$par[2])
+
+  results$p[i] = p.mle
+  results$theta[i] = theta.mle
+}
+
+results
+```
+
+*Interpretation:*
+Each value for p represents the players win probability for a given leg, therefore players with higher values for p are more likely to win legs in a given match. Theta in this context represents how each leg affects the subsequent leg. Because all players have theta values below 1, we can say that all players tend toward more balanced wins and losses/closer final scores.
+
+Knowing this, we can see that Luke Littler has the highest chance of winning any given leg due to his having the highest p value. We can also observe that Luke Humphries, despite not having the highest p value, has the lowest theta value. This means that he experiences more back-and-forth leg victories and losses.
 
 ## Altham's Multiplicative Beta Binomial Distribution
 
