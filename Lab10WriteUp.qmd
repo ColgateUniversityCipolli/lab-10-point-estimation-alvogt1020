@@ -367,7 +367,7 @@ for(i in 1:length(players)){
   leg.counts = c(won$WinnerLegs, lost$LoserLegs)
 
   #building MLE
-  params = c(0,0) #moderate initial guesses
+  params = c(0,0) # initial guesses
   mle = optim(par=params,
                  fn=llaltbinom,
                  x=leg.counts,
@@ -375,7 +375,7 @@ for(i in 1:length(players)){
                  mle=T)
   
   p.mle = 1/(1+exp(-mle$par[1]))
-  theta.mle <- exp(mle$par[2])
+  theta.mle = exp(mle$par[2])
 
   results$p[i] = p.mle
   results$theta[i] = theta.mle
@@ -387,7 +387,9 @@ results
 *Interpretation:*
 Each value for p represents the players win probability for a given leg, therefore players with higher values for p are more likely to win legs in a given match. Theta in this context represents how each leg affects the subsequent leg. Because all players have theta values below 1, we can say that all players tend toward more balanced wins and losses/closer final scores.
 
-Knowing this, we can see that Luke Littler has the highest chance of winning any given leg due to his having the highest p value. We can also observe that Luke Humphries, despite not having the highest p value, has the lowest theta value. This means that he experiences more back-and-forth leg victories and losses.
+Knowing this, we can see that Luke Littler has the highest chance of winning any given leg due to his having the highest p value. We can also observe that Luke Humphries, despite not having the highest p value, has the lowest theta value. This means that he experiences more back-and-forth leg victories and losses.  
+
+With regard to the standings, we find that p doesn't 100% map to the rankings as consistently as one might expect. For example, Luke Humphries was ranked second and has a p value of 0.669, whereas Nathan Aspinall has a greater p value of 0.690 despite being ranked 5th place. Regardless, it still does a good job at roughly predicting the rankings.
 
 ## Altham's Multiplicative Beta Binomial Distribution
 
@@ -407,5 +409,78 @@ For each player in the 2024 season, use the number of legs won in each match to 
 * Make comments about the MLEs in the context of the standings.\
 **Note**: The players alternate who throws first in a leg has the mathematical "head start" to reach a finish before their opponent can take another turn. Players alternate who throws first with each leg.
 
+
+```{r}
+llaltbbinom = function(par, x, n, mle=F){
+  alpha =  ifelse(mle, exp(par[1]), par[1])
+  beta =  ifelse(mle, exp(par[2]), par[2])
+  theta =  ifelse(mle, exp(par[3]), par[3])
+  log.probs = log(daltbbinom(x = 0:6, size = n, alpha = alpha, beta = beta, theta = theta))
+  ll = sum(log.probs[x + 1])
+  ifelse(mle, -ll,ll)
+}
+
+
+#obtain unique list of player names to loop over
+players = unique(c(pdc.dat$Winner,pdc.dat$Loser))
+
+#preallocated tibble to store MLE estimates
+  results = tibble(
+    Player = players,
+    alpha = NA,
+    beta = NA,
+    theta = NA,
+    beta.mean = NA,
+    beta.sd = NA
+  )
+
+for(i in 1:length(players)){
+  won = pdc.dat |>
+    filter(Winner==players[i])
+    #head(won)
+  lost = pdc.dat |>
+    filter(Loser==players[i])
+    #head(lost) 
+  leg.counts = c(won$WinnerLegs, lost$LoserLegs)
+
+  #building MLE
+  params = c(0,0,0) #initial guesses
+  mle = optim(par=params,
+                 fn=llaltbbinom,
+                 x=leg.counts,
+                 n=6,
+                 mle=T)
+  
+  alpha.mle = exp(mle$par[1])
+  beta.mle = exp(mle$par[2])
+  theta.mle = exp(mle$par[3])
+
+  results$alpha[i] = alpha.mle
+  results$beta[i] = beta.mle
+  results$theta[i] = theta.mle
+  results$beta.mean[i] = alpha.mle / (alpha.mle + beta.mle)
+  results$beta.sd[i] = sqrt( (alpha.mle*beta.mle) / ((alpha.mle + beta.mle)^2 * (alpha.mle + beta.mle + 1)) )
+}
+
+results
+```
+
+*Comments:*
+The mean of beta represents the average win probability. For example, Rob Cross' average win probability is 0.791 in this model. The standard deviation of beta represents the variability of their leg winning probabilities. The standard deviations are all roughly similar, with the range being from 0.151 to 0.287. Interestingly, we see that Peter Wright, the worst ranked player and the one with the lowest beta mean, has one of the lowest beta standard deviations. Therefore, we can say that he was consistently bad.
+
+Interestingly, most players in this model have theta values greater than one, indicating more momentum/interdependence between legs with each match.
+
+With regard to the standings, we notice that the mean of beta also maps roughly to the rankings, with clearer differences between top and bottom players than in the regular Altham Binomial model. That is to say, players with higher mean values for beta tend to be higher in the ranking. 
+
 ## Executive Summary
 Summarize the work you've done here to provide a brief (200-300 word) data-driven summary of the 2024 Premier League season using your work in Lab 10. Your summary should be professional, clear, and all claims should be corroborated with statistical support.
+
+**Response:**
+The 2024 PDC Premier League's regular season took place over 16 nights, with eight of the World's best dart players competing in best of 11 matches. With these data, we were able to count the number of legs won in each match for a given player. We first obtain a high-level numerical summary and data visualization for general information regarding the season. The median match ended with a score differential of 2, meaning a final scoreline of 6-4. This, in combination with an IQR of 2, demonstrates how many of the matches during this season were relatively close, with limited blow-out matches.  
+
+After obtaining this initial overview of the season, we then use the data to fit two models for identifying players' skill levels. The first of these two models is Altham's Multiplicative Binomial Distribution, which estimates a players per-leg win probability ($p$) and per-match leg dependence  ($\theta$). In this model, Luke Littler had the highest win probability ($p=0.692$) and Peter Wright had the lowest ($p = 0.539$). However, this model was not perfect in its assessment, as 5th place Nathan Aspinall had a higher win probability. Also of note is that $\theta < 1$ for all players in this model, suggesting that within each match, legs tended to be *negatively* correlated/flip-flop.
+
+
+We then analyze the season using Altham's Multiplicative *Beta* Binomial Distribution. In this model, $p$ is no longer fixed, but instead variable across matches. The average probabilities in this model differed significantly from before, with clearer separation between high and low-ranked players (Littler = 0.935, Wright = 0.560). Interestingly, the $\theta$ values found by this model were majority greater than 1, indicating that matches featured momentum rather than flip-flopping.  
+
+Despite the slightly different outcomes, the player assessments made by each model align with the 2024 PDC Premier League ranking.
